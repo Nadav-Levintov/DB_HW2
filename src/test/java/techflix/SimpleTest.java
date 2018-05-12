@@ -2,6 +2,7 @@ package techflix;
 
 import org.junit.Test;
 import techflix.business.Movie;
+import techflix.business.MovieRating;
 import techflix.business.ReturnValue;
 import techflix.business.Viewer;
 
@@ -61,21 +62,21 @@ public class SimpleTest extends  AbstractTest {
         /* Init views */
         actual = Solution.addView(1,1);
         assertEquals(OK, actual);
-        actual = Solution.addView(1,2);
+        /*actual = Solution.addView(1,2);
         assertEquals(OK, actual);
         actual = Solution.addView(1,3);
         assertEquals(OK, actual);
         actual = Solution.addView(1,4);
         assertEquals(OK, actual);
-
+        */
         /* Test getSimilarViews*/
         ArrayList<Integer> res = Solution.getSimilarViewers(1);
         assertEquals(res.isEmpty(),Boolean.TRUE);
 
-        actual = Solution.addView(2,1);
+        /*actual = Solution.addView(2,1);
         assertEquals(OK, actual);
         actual = Solution.addView(2,2);
-        assertEquals(OK, actual);
+        assertEquals(OK, actual);*/
         res = Solution.getSimilarViewers(1);
         assertEquals(res.isEmpty(),Boolean.TRUE);
 
@@ -83,20 +84,31 @@ public class SimpleTest extends  AbstractTest {
         assertEquals(OK, actual);
         actual = Solution.addView(2,4);
         assertEquals(OK, actual);
-        res = Solution.getSimilarViewers(1);
-        assertEquals(1,res.size());
+        //res = Solution.getSimilarViewers(1);
+        //assertEquals(1,res.size());
 
         actual = Solution.addView(3,1);
         assertEquals(OK, actual);
         actual = Solution.addView(3,2);
         assertEquals(OK, actual);
-        actual = Solution.addView(3,3);
+
+        /*actual = Solution.addView(3,3);
         assertEquals(OK, actual);
         actual = Solution.addView(3,4);
-        assertEquals(OK, actual);
-        res = Solution.getSimilarViewers(1);
-        assertEquals(2,res.size());
+        assertEquals(OK, actual);*/
+        //res = Solution.getSimilarViewers(1);
+        //assertEquals(2,res.size());
 
+        actual = Solution.addMovieRating(1, 1,MovieRating.LIKE);
+        assertEquals(OK, actual);
+        actual = Solution.addMovieRating(3,1, MovieRating.LIKE);
+        assertEquals(OK, actual);
+        actual = Solution.addMovieRating(2,3, MovieRating.LIKE);
+        assertEquals(OK, actual);
+
+        res = Solution.getSimilarViewers(1);
+        assertEquals(Boolean.TRUE,res.size() < 11);
+        assertEquals(Boolean.TRUE,res.size() > 0);
 
 
     }

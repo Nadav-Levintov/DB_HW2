@@ -639,7 +639,7 @@ public class Solution {
         int res = 0;
         try {
             pstmt = connection.prepareStatement("UPDATE public.viewed_liked\n" +
-                    " SET liked=CAST(? AS MovieRating)\n" +
+                    " SET liked=?::\"MovieRating\"\n" +
                     " WHERE viewer_id=? AND movie_id=?");
             pstmt.setInt(2, viewerId);
             pstmt.setInt(3, movieId);
@@ -818,8 +818,39 @@ public class Solution {
 
     public static ArrayList<Integer> mostInfluencingViewers()
     {
+        Connection connection = DBConnector.getConnection();
+        PreparedStatement pstmt = null;
+        ArrayList<Integer> res = new ArrayList<>();
+        try {
+            pstmt = connection.prepareStatement(
+                    " SELECT viewer_id, COUNT(movie_id) AS count_movie, COUNT(liked) AS count_like \n"+
+                        " FROM viewed_liked GROUP BY viewer_id \n"+
+                        " ORDER BY count_movie DESC, count_like DESC, viewer_id ASC");
+            ResultSet results = pstmt.executeQuery();
+            while (results.next())
+            {
+                res.add(results.getInt(1));
+            }
 
-        return null;
+            results.close();
+
+        } catch (SQLException e) {
+            return new ArrayList<Integer>();
+        }
+        finally {
+            try {
+                pstmt.close();
+            } catch (SQLException e) {
+                //e.printStackTrace()();
+            }
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                //e.printStackTrace()();
+            }
+        }
+
+        return res;
     }
 
 
