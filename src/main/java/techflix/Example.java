@@ -196,7 +196,7 @@ public class Example {
         try {
             pstmt = connection.prepareStatement("INSERT INTO hello_world" +
                     " VALUES (?, ?), (?, ?)");
-            pstmt.setInt(1,1);
+            pstmt.setInt(1,-1);
             pstmt.setString(2, "hello world!");
             pstmt.setInt(3,2);
             pstmt.setString(4,"goodbye world!");
@@ -205,6 +205,7 @@ public class Example {
             pstmt.execute();
 
         } catch (SQLException e) {
+            System.out.println(e.getSQLState());
             //e.printStackTrace()();
         }
         finally {
