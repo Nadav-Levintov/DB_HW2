@@ -101,7 +101,7 @@ public class SimpleTest extends  AbstractTest {
 
         actual = Solution.addMovieRating(1, 1,MovieRating.LIKE);
         assertEquals(OK, actual);
-        actual = Solution.addMovieRating(3,1, MovieRating.LIKE);
+        actual = Solution.addMovieRating(3,1, MovieRating.DISLIKE);
         assertEquals(OK, actual);
         actual = Solution.addMovieRating(2,3, MovieRating.LIKE);
         assertEquals(OK, actual);
@@ -110,6 +110,23 @@ public class SimpleTest extends  AbstractTest {
         assertEquals(Boolean.TRUE,res.size() < 11);
         assertEquals(Boolean.TRUE,res.size() > 0);
 
+        res = Solution.getMoviesRecommendations(1);
+        assertEquals(0,res.size());
+
+        actual = Solution.addMovieRating(3, 2,MovieRating.LIKE);
+        assertEquals(OK, actual);
+
+        res = Solution.getMoviesRecommendations(1);
+        assertEquals(1,res.size());
+
+        res = Solution.getConditionalRecommendations(1,1);
+        assertEquals(0,res.size());
+
+        actual = Solution.addMovieRating(3,1, MovieRating.LIKE);
+        assertEquals(OK, actual);
+
+        res = Solution.getConditionalRecommendations(1,1);
+        assertEquals(1,res.size());
 
     }
 
