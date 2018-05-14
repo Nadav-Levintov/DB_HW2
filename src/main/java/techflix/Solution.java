@@ -295,8 +295,6 @@ public class Solution {
             pstmt.setString(1, viewer.getName());
             res = pstmt.executeUpdate();
         } catch (SQLException e) {
-            if( res == 0)
-                return ReturnValue.NOT_EXISTS;
             if (Integer.valueOf(e.getSQLState()) == PostgresSQLErrorCodes.NOT_NULL_VIOLATION.getValue() ||
                     Integer.valueOf(e.getSQLState()) == PostgresSQLErrorCodes.CHECK_VIOLATION.getValue()) {
                 return ReturnValue.BAD_PARAMS;
@@ -330,8 +328,8 @@ public class Solution {
         PreparedStatement pstmt = null;
         List<Viewer> viewers = new ArrayList<>();
         try {
-            pstmt = connection.prepareStatement("SELECT * FROM viewer" +
-            "where viewer_id = ? ");
+            pstmt = connection.prepareStatement("SELECT * FROM viewer " +
+            "WHERE viewer_id = ? ");
             pstmt.setInt(1,viewerId);
             ResultSet results = pstmt.executeQuery();
             viewers = parse_viewers(results);
@@ -455,8 +453,6 @@ public class Solution {
             pstmt.setString(1, movie.getDescription());
             res = pstmt.executeUpdate();
         } catch (SQLException e) {
-            if( res == 0)
-                return ReturnValue.NOT_EXISTS;
             if (Integer.valueOf(e.getSQLState()) == PostgresSQLErrorCodes.NOT_NULL_VIOLATION.getValue() ||
                     Integer.valueOf(e.getSQLState()) == PostgresSQLErrorCodes.CHECK_VIOLATION.getValue()) {
                 return ReturnValue.BAD_PARAMS;
@@ -490,8 +486,8 @@ public class Solution {
         PreparedStatement pstmt = null;
         List<Movie> movies = new ArrayList<>();
         try {
-            pstmt = connection.prepareStatement("SELECT * FROM movie" +
-                    "where movie_id = ? ");
+            pstmt = connection.prepareStatement("SELECT * FROM movie " +
+                    "WHERE movie_id = ? ");
             pstmt.setInt(1,movieId);
             ResultSet results = pstmt.executeQuery();
             movies = parse_movies(results);
