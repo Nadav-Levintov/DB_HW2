@@ -778,12 +778,14 @@ public class Solution {
                     "SELECT viewer_id FROM\n" +
                             "(SELECT viewer_id, COUNT(movie_id) FROM\n" +
                             "(SELECT * FROM viewed_liked WHERE movie_id IN\n" +
-                            "(SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> 1) AS \n"+
+                            "(SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS \n"+
                             " similar_viewers_movies GROUP BY viewer_id) AS similar_counts\n" +
-                            "WHERE similar_counts.count > (((SELECT COUNT(movie_id) FROM \n"+
-                            "(SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *3)/4)");
+                            "WHERE similar_counts.count >= (((SELECT COUNT(movie_id) FROM \n"+
+                            "(SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *3)/4)\n" +
+                            "ORDER BY viewer_id ASC");
             pstmt.setInt(1,viewerId);
             pstmt.setInt(2,viewerId);
+            pstmt.setInt(3,viewerId);
             ResultSet results = pstmt.executeQuery();
             while (results.next())
             {
@@ -866,8 +868,9 @@ public class Solution {
                             " (SELECT * FROM viewed_liked WHERE movie_id IN\n" +
                             " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS\n" +
                             " similar_viewers_movies GROUP BY viewer_id) AS similar_counts\n" +
-                            " WHERE similar_counts.count > (((SELECT COUNT(movie_id) FROM \n" +
-                            " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *3)/4))"+
+                            " WHERE similar_counts.count >= (((SELECT COUNT(movie_id) FROM \n" +
+                            " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *3)/4)\n" +
+                            " ORDER BY viewer_id ASC)"+
                             " GROUP BY movie_id \n" +
                             " ORDER BY count_likes DESC, movie_id ASC LIMIT 10) AS recomend_with_count\n");
             pstmt.setInt(1,viewerId);
