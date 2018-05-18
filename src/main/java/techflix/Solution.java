@@ -860,24 +860,93 @@ public class Solution {
         ArrayList<Integer> res = new ArrayList<>();
         try {
             pstmt = connection.prepareStatement(
-                    "SELECT movie_id FROM (\n" +
-                            "SELECT movie_id, COUNT(liked) AS count_likes FROM viewed_liked WHERE \n"+
-                            " (liked='LIKE' OR liked IS NULL)\n" +
-                            " AND movie_id NOT IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
-                            " AND viewer_id IN (SELECT viewer_id FROM\n" +
-                            " (SELECT viewer_id, COUNT(movie_id) FROM\n" +
-                            " (SELECT * FROM viewed_liked WHERE movie_id IN\n" +
-                            " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS\n" +
-                            " similar_viewers_movies GROUP BY viewer_id) AS similar_counts\n" +
-                            " WHERE similar_counts.count >= ((SELECT COUNT(movie_id) FROM \n" +
-                            " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *0.75)\n" +
-                            " ORDER BY viewer_id ASC)"+
-                            " GROUP BY movie_id \n" +
-                            " ORDER BY count_likes DESC, movie_id ASC LIMIT 10) AS recomend_with_count\n");
+                    "SELECT movie_id FROM (SELECT A.movie_id, A.count_viewd, B.count_likes FROM\n" +
+                            "(SELECT \n" +
+                            "movie_id, COUNT(viewer_id) AS count_viewd\n" +
+                            "FROM viewed_liked\n" +
+                            "WHERE\n" +
+                            "movie_id \n" +
+                            "NOT IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") \n" +
+                            "AND viewer_id\n" +
+                            "IN (\n" +
+                            "SELECT viewer_id \n" +
+                            "FROM (\n" +
+                            "SELECT viewer_id, COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT * FROM viewed_liked WHERE movie_id\n" +
+                            "IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") \n" +
+                            "AND viewer_id <> ?\n" +
+                            ") \n" +
+                            "AS similar_viewers_movies GROUP BY viewer_id\n" +
+                            ") AS similar_counts \n" +
+                            "WHERE \n" +
+                            "similar_counts.count \n" +
+                            ">= (\n" +
+                            "(SELECT COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") AS viewer_movies \n" +
+                            ") *0.75\n" +
+                            ") \n" +
+                            "ORDER BY viewer_id ASC\n" +
+                            ")\n" +
+                            "GROUP BY movie_id ) A\n" +
+                            "LEFT OUTER JOIN\n" +
+                            "(SELECT \n" +
+                            "(movie_id), COUNT(liked) AS count_likes\n" +
+                            "FROM viewed_liked\n" +
+                            "WHERE (\n" +
+                            "liked='LIKE'\n" +
+                            ") \n" +
+                            "AND\n" +
+                            "movie_id \n" +
+                            "NOT IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") \n" +
+                            "AND viewer_id\n" +
+                            "IN (\n" +
+                            "SELECT viewer_id \n" +
+                            "FROM (\n" +
+                            "SELECT viewer_id, COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT * FROM viewed_liked WHERE movie_id\n" +
+                            "IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") \n" +
+                            "AND viewer_id <> ?\n" +
+                            ") \n" +
+                            "AS similar_viewers_movies GROUP BY viewer_id\n" +
+                            ") AS similar_counts \n" +
+                            "WHERE \n" +
+                            "similar_counts.count \n" +
+                            ">= (\n" +
+                            "(SELECT COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") AS viewer_movies \n" +
+                            ") *0.75\n" +
+                            ") \n" +
+                            "ORDER BY viewer_id ASC\n" +
+                            ")\n" +
+                            "GROUP BY movie_id ) B\n" +
+                            "ON A.movie_id = B.movie_id\n" +
+                            "ORDER BY count_likes IS NULL ASC, count_likes DESC, movie_id ASC LIMIT 10)\n" +
+                            "AS recomend_with_count\n" +
+                            "\n" +
+                            "\n" +
+                            "\t\t");
             pstmt.setInt(1,viewerId);
             pstmt.setInt(2,viewerId);
             pstmt.setInt(3,viewerId);
             pstmt.setInt(4,viewerId);
+            pstmt.setInt(5,viewerId);
+            pstmt.setInt(6,viewerId);
+            pstmt.setInt(7,viewerId);
+            pstmt.setInt(8,viewerId);
             ResultSet results = pstmt.executeQuery();
             while (results.next())
             {
@@ -914,22 +983,70 @@ public class Solution {
         ArrayList<Integer> res = new ArrayList<>();
         try {
             pstmt = connection.prepareStatement(
-                    "SELECT movie_id FROM (\n" +
-                            " SELECT movie_id, COUNT(liked) AS count_likes FROM viewed_liked WHERE\n" +
-                            " (liked='LIKE' OR liked IS NULL)\n" +
-                            " AND movie_id NOT IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
-                            " AND viewer_id IN (SELECT viewer_id FROM\n" +
-                            " (SELECT viewer_id, COUNT(movie_id) FROM\n" +
-                            " (SELECT * FROM viewed_liked WHERE movie_id IN\n" +
-                            " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS\n" +
-                            " similar_viewers_movies GROUP BY viewer_id) AS similar_counts\n" +
-                            " WHERE similar_counts.count >= ((SELECT COUNT(movie_id) FROM \n" +
-                            " (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *0.75)\n" +
-                            " ORDER BY viewer_id ASC) AND viewer_id IN\n" +
-                            " (SELECT viewer_id FROM viewed_liked WHERE movie_id = ? AND liked=(\n" +
-                            " SELECT liked FROM viewed_liked WHERE viewer_id = ? AND movie_id = ?))\n" +
-                            " GROUP BY movie_id\n" +
-                            " ORDER BY count_likes DESC, movie_id ASC LIMIT 10) AS recomend_with_count");
+                    "SELECT movie_id FROM (SELECT A.movie_id, A.count_viewd, B.count_likes FROM\n" +
+                            "(SELECT \n" +
+                            "movie_id, COUNT(viewer_id) AS count_viewd\n" +
+                            "FROM viewed_liked\n" +
+                            "WHERE\n" +
+                            "movie_id \n" +
+                            "NOT IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AND viewer_id\n" +
+                            "IN (\n" +
+                            "SELECT viewer_id \n" +
+                            "FROM (\n" +
+                            "SELECT viewer_id, COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT * FROM viewed_liked WHERE movie_id\n" +
+                            "IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") \n" +
+                            "AND viewer_id <> ?\n" +
+                            ") \n" +
+                            "AS similar_viewers_movies GROUP BY viewer_id\n" +
+                            ") AS similar_counts \n" +
+                            "WHERE \n" +
+                            "similar_counts.count >= ((SELECT COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") AS viewer_movies \n" +
+                            ") *0.75\n" +
+                            ") \n" +
+                            "ORDER BY viewer_id ASC) AND viewer_id IN (SELECT viewer_id FROM viewed_liked WHERE movie_id = ? AND liked=( SELECT liked FROM viewed_liked WHERE viewer_id = ? AND movie_id = ?))\n" +
+                            "\n" +
+                            "GROUP BY movie_id ) A\n" +
+                            "LEFT OUTER JOIN (SELECT \n" +
+                            "(movie_id), COUNT(liked) AS count_likes\n" +
+                            "FROM viewed_liked\n" +
+                            "WHERE (liked='LIKE')AND\n" +
+                            "movie_id \n" +
+                            "NOT IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AND viewer_id IN (\n" +
+                            "SELECT viewer_id \n" +
+                            "FROM (\n" +
+                            "SELECT viewer_id, COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT * FROM viewed_liked WHERE movie_id\n" +
+                            "IN (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") \n" +
+                            "AND viewer_id <> ?\n" +
+                            ") \n" +
+                            "AS similar_viewers_movies GROUP BY viewer_id\n" +
+                            ") AS similar_counts \n" +
+                            "WHERE \n" +
+                            "similar_counts.count \n" +
+                            ">= (\n" +
+                            "(SELECT COUNT(movie_id) \n" +
+                            "FROM (\n" +
+                            "SELECT movie_id FROM viewed_liked WHERE viewer_id = ?\n" +
+                            ") AS viewer_movies \n" +
+                            ") *0.75\n" +
+                            ") \n" +
+                            "ORDER BY viewer_id ASC) AND viewer_id IN (SELECT viewer_id FROM viewed_liked WHERE movie_id = ? AND liked=( SELECT liked FROM viewed_liked WHERE viewer_id = ? AND movie_id = ?)) \t\t\t\n" +
+                            "GROUP BY movie_id ) B\n" +
+                            "ON A.movie_id = B.movie_id\n" +
+                            "\n" +
+                            "ORDER BY count_likes IS NULL ASC, count_likes DESC, movie_id ASC LIMIT 10)AS recomend_with_count");
             pstmt.setInt(1,viewerId);
             pstmt.setInt(2,viewerId);
             pstmt.setInt(3,viewerId);
@@ -937,6 +1054,14 @@ public class Solution {
             pstmt.setInt(5,movieId);
             pstmt.setInt(6,viewerId);
             pstmt.setInt(7,movieId);
+            pstmt.setInt(8,viewerId);
+            pstmt.setInt(9,viewerId);
+            pstmt.setInt(10,viewerId);
+            pstmt.setInt(11,viewerId);
+            pstmt.setInt(12,movieId);
+            pstmt.setInt(13,viewerId);
+            pstmt.setInt(14,movieId);
+
             ResultSet results = pstmt.executeQuery();
             while (results.next())
             {
