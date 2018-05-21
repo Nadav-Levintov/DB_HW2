@@ -860,13 +860,13 @@ public class Solution {
         try{
             /*Get recommendations*/
             pstmt = connection.prepareStatement("SELECT movie_id FROM\n" +
-                    "(SELECT MoviesWathedBySimilarViewers.movie_id, MoviesWathedBySimilarViewersAndLikeCount.count_likes FROM\n" +
+                    "(SELECT MoviesWatchedBySimilarViewers.movie_id, MoviesWatchedBySimilarViewersAndLikeCount.count_likes FROM\n" +
                     "(SELECT movie_id FROM viewed_liked WHERE movie_id NOT IN ( SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
                     "AND viewer_id IN (SELECT viewer_id FROM (SELECT viewer_id, COUNT(movie_id) FROM (SELECT * FROM viewed_liked \n" +
                     "WHERE movie_id IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS \n" +
                     "similar_viewers_movies GROUP BY viewer_id) AS similar_counts \n" +
                     "WHERE similar_counts.count >= ((SELECT COUNT(movie_id) FROM (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
-                    "AS viewer_movies ) *0.75) ORDER BY viewer_id ASC) GROUP BY movie_id) MoviesWathedBySimilarViewers \n" +
+                    "AS viewer_movies ) *0.75) ORDER BY viewer_id ASC) GROUP BY movie_id) MoviesWatchedBySimilarViewers \n" +
                     "LEFT OUTER JOIN\n" +
                     "(SELECT movie_id, COUNT(liked) AS count_likes FROM viewed_liked WHERE ( liked='LIKE') AND\n" +
                     "movie_id NOT IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AND viewer_id IN " +
@@ -874,8 +874,8 @@ public class Solution {
                     "WHERE movie_id IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS \n" +
                     "similar_viewers_movies GROUP BY viewer_id) AS similar_counts \n" +
                     "WHERE similar_counts.count >= ((SELECT COUNT(movie_id) FROM (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
-                    "AS viewer_movies ) *0.75) ORDER BY viewer_id ASC) GROUP BY movie_id) MoviesWathedBySimilarViewersAndLikeCount ON " +
-                    "MoviesWathedBySimilarViewers.movie_id = MoviesWathedBySimilarViewersAndLikeCount.movie_id \n" +
+                    "AS viewer_movies ) *0.75) ORDER BY viewer_id ASC) GROUP BY movie_id) MoviesWatchedBySimilarViewersAndLikeCount ON " +
+                    "MoviesWatchedBySimilarViewers.movie_id = MoviesWatchedBySimilarViewersAndLikeCount.movie_id \n" +
                     "ORDER BY count_likes IS NULL ASC, count_likes DESC, movie_id ASC LIMIT 10) AS moviesAndLikes");
             pstmt.setInt(1,viewerId);
             pstmt.setInt(2,viewerId);
@@ -920,14 +920,14 @@ public class Solution {
         ArrayList<Integer> res = new ArrayList<>();
         try {
             pstmt = connection.prepareStatement("SELECT movie_id FROM\n" +
-                    "(SELECT MoviesWathedBySimilarViewers.movie_id, MoviesWathedBySimilarViewersAndLikeCount.count_likes FROM\n" +
+                    "(SELECT MoviesWatchedBySimilarViewers.movie_id, MoviesWatchedBySimilarViewersAndLikeCount.count_likes FROM\n" +
                     "(SELECT movie_id FROM viewed_liked WHERE movie_id NOT IN ( SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
                     "AND viewer_id IN (SELECT viewer_id FROM (SELECT viewer_id, COUNT(movie_id) FROM (SELECT * FROM viewed_liked \n" +
                     "WHERE movie_id IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)  AND viewer_id <> ?) AS \n" +
                     "similar_viewers_movies GROUP BY viewer_id) AS similar_counts WHERE similar_counts.count >= ((SELECT COUNT(movie_id) FROM \n" +
                     "(SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AS viewer_movies ) *0.75) ORDER BY viewer_id ASC) AND viewer_id IN \n" +
                     "(SELECT viewer_id FROM viewed_liked WHERE movie_id = ? AND liked=( SELECT liked FROM viewed_liked WHERE viewer_id = ? AND movie_id = ?)) \n" +
-                    "GROUP BY movie_id) MoviesWathedBySimilarViewers \n" +
+                    "GROUP BY movie_id) MoviesWatchedBySimilarViewers \n" +
                     "LEFT OUTER JOIN\n" +
                     "(SELECT movie_id, COUNT(liked) AS count_likes FROM viewed_liked WHERE ( liked='LIKE') AND\n" +
                     "movie_id NOT IN (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?) AND viewer_id IN \n" +
@@ -937,8 +937,8 @@ public class Solution {
                     "WHERE similar_counts.count >= ((SELECT COUNT(movie_id) FROM (SELECT movie_id FROM viewed_liked WHERE viewer_id = ?)\n" +
                     "AS viewer_movies ) *0.75) ORDER BY viewer_id ASC)  AND viewer_id IN (SELECT viewer_id FROM viewed_liked \n" +
                     "WHERE movie_id = ? AND liked=( SELECT liked FROM viewed_liked WHERE viewer_id = ? AND movie_id = ?))\n" +
-                    "GROUP BY movie_id) MoviesWathedBySimilarViewersAndLikeCount \n" +
-                    "ON MoviesWathedBySimilarViewers.movie_id = MoviesWathedBySimilarViewersAndLikeCount.movie_id \n" +
+                    "GROUP BY movie_id) MoviesWatchedBySimilarViewersAndLikeCount \n" +
+                    "ON MoviesWatchedBySimilarViewers.movie_id = MoviesWatchedBySimilarViewersAndLikeCount.movie_id \n" +
                     "ORDER BY count_likes IS NULL ASC, count_likes DESC, movie_id ASC LIMIT 10) AS moviesAndLikes");
             pstmt.setInt(1,viewerId);
             pstmt.setInt(2,viewerId);
